@@ -12,3 +12,6 @@ user_inputs.xlsx
 # Cache Streamlit
 .streamlit/
 
+# Ne pas versionner le fichier de secrets
+.streamlit/secrets.toml
+
