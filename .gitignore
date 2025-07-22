@@ -1,0 +1,14 @@
+# Clé privée Google Sheets
+service_key.json
+
+# Dossier venv
+venv/
+.venv/
+
+# Logs et excel temporaires
+*.log
+user_inputs.xlsx
+
+# Cache Streamlit
+.streamlit/
+
