@@ -10,12 +10,12 @@ from sklearn.linear_model import LogisticRegression
 # Configuration de la page
 st.set_page_config(
     page_title="Détecteur d'Obésité",
-    page_icon="💪",
+    page_icon="",
     layout="centered",
     initial_sidebar_state="auto"
 )
 
-# 🎨 CSS personnalisé
+#  CSS personnalisé
 st.markdown("""
     <style>
     body {
