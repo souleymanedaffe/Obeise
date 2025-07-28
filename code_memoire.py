@@ -188,7 +188,7 @@ if submitted:
         df_all = raw.copy()
 
     df_all.to_excel(DATA_FILE, index=False, engine='openpyxl')
-    st.info(f" Les données ont été enregistrées avec succès.")
+    
 
 # 🖋️ Signature en bas de page
 st.markdown("""
