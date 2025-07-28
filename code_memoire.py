@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-import io
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -11,53 +10,56 @@ from sklearn.linear_model import LogisticRegression
 st.set_page_config(
     page_title="Détecteur d'Obésité",
     page_icon="",
-    layout="centered",
-    initial_sidebar_state="auto"
+    layout="centered"
 )
 
-#  CSS personnalisé
+# CSS personnalisé
 st.markdown("""
     <style>
-    body {
-        background-color: #F0F2F6;
+    .stApp {
+       
+        font-size: 50px !important;
+        font-family: 'Segoe UI', sans-serif;
     }
-    .main {
-        background-color: #ffffff;
-        border-radius: 10px;
-        padding: 30px;
-    }
-    h1 {
+
+    h1, h2, h3 {
+        font-size: 42px !important;
         color: #ff4b4b;
         text-align: center;
-        font-size: 40px;
     }
-    .stButton>button {
+
+    label, .stSelectbox label, .stSlider label, .stNumberInput label {
+        font-size: 30px !important;
+    }
+
+    .stButton > button {
         background-color: #4CAF50;
         color: white;
+        font-size: 50px !important;
         font-weight: bold;
+        padding: 0.7em 1.2em;
+        border-radius: 8px;
     }
+
     .footer {
         text-align: center;
-        font-size: 14px;
+        font-size: 40px !important;
         margin-top: 50px;
         color: gray;
+        font-style: italic;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # Titre
 st.title(" Détecteur de classe d'obésité")
+st.markdown("Remplissez les informations ci-dessous puis cliquez sur **Détecter l'obésité**.")
 
-st.markdown("""
-> Remplissez toutes les informations ci‑dessous puis cliquez sur **Détecter l'obésité**.
-""")
-
-# Fonction de chargement et entraînement
+# Chargement et entraînement
 @st.cache_resource
 def load_and_train():
     df = pd.read_csv("ObesityDataSet_raw_and_data_sinthetic.csv")
 
-    # Traduction des valeurs
     df['Gender'].replace({'Male': 'Homme', 'Female': 'Femme'}, inplace=True)
     df['family_history_with_overweight'].replace({'yes': 'Oui', 'no': 'Non'}, inplace=True)
     df['FAVC'].replace({'yes': 'Oui', 'no': 'Non'}, inplace=True)
@@ -82,7 +84,6 @@ def load_and_train():
         'Obesity_Type_III': 'Obésité (type III)'
     }, inplace=True)
 
-    # Discrétisation
     cuts_map = {
         'FCVC': [0, 1.5, 2.5, np.inf],
         'NCP':  [0, 1.5, 2.5, np.inf],
@@ -93,10 +94,8 @@ def load_and_train():
     for col, bins in cuts_map.items():
         df[col] = pd.cut(df[col], bins=bins, labels=False, include_lowest=True)
 
-    # IMC
     df['IMC'] = df['Weight'] / (df['Height']**2)
 
-    # Encodage
     le_dict = {}
     for col in ['Gender','family_history_with_overweight','FAVC','CAEC',
                 'SMOKE','SCC','CALC','MTRANS','NObeyesdad']:
@@ -125,28 +124,28 @@ def load_and_train():
 
 model, le_dict, feature_columns = load_and_train()
 
-# Formulaire
+# Formulaire utilisateur
 with st.form("input_form"):
     gender = st.selectbox("Genre", le_dict['Gender'].classes_)
-    age    = st.number_input("Âge (années)", min_value=1, max_value=120, value=20)
+    age = st.number_input("Âge (années)", min_value=1, max_value=120, value=25)
     height = st.number_input("Taille (m)", step=0.01, value=1.70)
-    weight = st.number_input("Poids (kg)", step=0.1,  value=70.0)
-    fh     = st.selectbox("Antécédent familial de surpoids", le_dict['family_history_with_overweight'].classes_)
-    favc   = st.selectbox("FAVC (aliments caloriques fréquents)", le_dict['FAVC'].classes_)
-    fcvc   = st.slider("FCVC (fréquence de légumes/jour)", 0.0, 7.0, step=0.1, value=2.0)
-    ncp    = st.slider("NCP (repas principaux/jour)", 0.0, 5.0, step=0.1, value=2.0)
-    caec   = st.selectbox("CAEC (grignotage entre repas)", le_dict['CAEC'].classes_)
-    smoke  = st.selectbox("Fume", le_dict['SMOKE'].classes_)
-    ch2o   = st.slider("CH2O (litres d'eau / jour)", 0.0, 5.0, step=0.1, value=2.0)
-    scc    = st.selectbox("SCC (suivi des calories)", le_dict['SCC'].classes_)
-    faf    = st.slider("FAF (activité physique / semaine)", 0.0, 20.0, step=0.1, value=1.0)
-    tue    = st.slider("TUE (temps écran / jour)", 0.0, 20.0, step=0.1, value=2.0)
-    calc   = st.selectbox("CALC (alcool)", le_dict['CALC'].classes_)
-    mtrans = st.selectbox("Moyen de transport", le_dict['MTRANS'].classes_)
+    weight = st.number_input("Poids (kg)", step=0.1, value=70.0)
+    fh = st.selectbox("Antécédents familiaux de surpoids", le_dict['family_history_with_overweight'].classes_)
+    favc = st.selectbox("Consommation fréquente d'aliments caloriques (FAVC)", le_dict['FAVC'].classes_)
+    fcvc = st.slider("Fréquence de consommation de légumes (FCVC)", 0.0, 7.0, 2.0, step=0.1)
+    ncp = st.slider("Nombre de repas principaux par jour (NCP)", 0.0, 5.0, 2.0, step=0.1)
+    caec = st.selectbox("Grignotage entre les repas (CAEC)", le_dict['CAEC'].classes_)
+    smoke = st.selectbox("Fumez-vous ?", le_dict['SMOKE'].classes_)
+    ch2o = st.slider("Consommation d'eau par jour (litres)", 0.0, 5.0, 2.0, step=0.1)
+    scc = st.selectbox("Surveillance des calories (SCC)", le_dict['SCC'].classes_)
+    faf = st.slider("Activité physique (heures/semaine)", 0.0, 20.0, 1.0, step=0.1)
+    tue = st.slider("Temps passé devant un écran (heures/jour)", 0.0, 20.0, 2.0, step=0.1)
+    calc = st.selectbox("Consommation d'alcool", le_dict['CALC'].classes_)
+    mtrans = st.selectbox("Moyen de transport principal", le_dict['MTRANS'].classes_)
 
     submitted = st.form_submit_button(" Détecter l'obésité")
 
-# Traitement après soumission
+# Prédiction et affichage des résultats
 DATA_FILE = "user_inputs.xlsx"
 
 if submitted:
@@ -159,11 +158,11 @@ if submitted:
     }])
 
     for col, bins in [
-        ('FCVC', [0,1.5,2.5,np.inf]),
-        ('NCP',  [0,1.5,2.5,np.inf]),
-        ('CH2O', [0,1.5,2.5,np.inf]),
-        ('FAF',  [0,0.5,1.5,2.5,np.inf]),
-        ('TUE',  [0,0.5,1.5,2.5,np.inf])
+        ('FCVC', [0, 1.5, 2.5, np.inf]),
+        ('NCP',  [0, 1.5, 2.5, np.inf]),
+        ('CH2O', [0, 1.5, 2.5, np.inf]),
+        ('FAF',  [0, 0.5, 1.5, 2.5, np.inf]),
+        ('TUE',  [0, 0.5, 1.5, 2.5, np.inf])
     ]:
         raw[col] = pd.cut(raw[col], bins=bins, labels=False, include_lowest=True)
 
@@ -177,7 +176,23 @@ if submitted:
     pred_index = model.predict(X_new)[0]
     pred_label = le_dict['NObeyesdad'].inverse_transform([pred_index])[0]
 
-    st.success(f" Classe prédite : **{pred_label}**")
+    imc_value = float(raw['IMC'].iloc[0])
+    st.markdown(f"###  IMC calculé : **{imc_value:.2f} kg/m²**")
+    st.success(f" Classe prédite : **{pred_label}**")
+
+    # Affichage des conseils
+    if imc_value < 18.5:
+        st.warning("🧍 IMC faible → *Insuffisance pondérale*. Consultez un nutritionniste.")
+    elif 18.5 <= imc_value < 25.0:
+        st.success("🏃 IMC normal → Continuez votre mode de vie équilibré.")
+    elif 25.0 <= imc_value < 30.0:
+        st.info("⚠️ Surpoids → Réduisez les aliments caloriques et bougez plus.")
+    elif 30.0 <= imc_value < 35.0:
+        st.warning("🚨 Obésité modérée → Accompagnement médical recommandé.")
+    elif 35.0 <= imc_value < 40.0:
+        st.error("❗ Obésité sévère → Suivi médical nécessaire.")
+    else:
+        st.error("⛔ Obésité massive → Intervention médicale urgente requise.")
 
     raw['Predicted_Class'] = pred_label
 
@@ -188,11 +203,11 @@ if submitted:
         df_all = raw.copy()
 
     df_all.to_excel(DATA_FILE, index=False, engine='openpyxl')
-    
+   
 
-# 🖋️ Signature en bas de page
+# Signature
 st.markdown("""
 <div class="footer">
-    Réalisé par <strong>SOULEYMANE DAFFE - DATA SCIENTIST</strong> 
+    Réalisé par <strong>SOULEYMANE DAFFE - DATA SCIENTIST</strong>
 </div>
 """, unsafe_allow_html=True)
