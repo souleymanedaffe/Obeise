@@ -144,7 +144,7 @@ with st.form("input_form"):
     calc   = st.selectbox("CALC (alcool)", le_dict['CALC'].classes_)
     mtrans = st.selectbox("Moyen de transport", le_dict['MTRANS'].classes_)
 
-    submitted = st.form_submit_button("🚀 Détecter l'obésité")
+    submitted = st.form_submit_button(" Détecter l'obésité")
 
 # Traitement après soumission
 DATA_FILE = "user_inputs.xlsx"
